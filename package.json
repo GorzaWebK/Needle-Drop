@@ -1,0 +1,21 @@
+{
+  "name": "needle-drop",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A 2D rhythm game played on a spinning vinyl record, printed like a loud risograph poster",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview --host",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fontsource/bungee": "^5.3.0",
+    "@fontsource/rubik": "^5.3.0"
+  },
+  "devDependencies": {
+    "vite": "^8.3.8",
+    "vitest": "^5.1.1"
+  }
+}
