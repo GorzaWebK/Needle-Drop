@@ -111,8 +111,9 @@ export class Renderer {
     g.fillStyle = P.bg;
     g.fillRect(0, 0, bw, bh);
     const maxD = Math.hypot(bw, bh) / 2;
-    halftone(g, 0, 0, bw, bh, (x, y) => ((Math.hypot(x - bw / 2, y - bh / 2) / maxD) ** 1.8) * (P.high ? 0.25 : 0.55), { cell: 11 * dpr, color: P.high ? P.ink : P.pinkDeep, angle: 0.4 });
-    applyGrain(g, this.grain, 0, 0, bw, bh, P.high ? 0.5 : 1);
+    // high contrast keeps the background clean so the HUD type stays crisp
+    if (!P.high) halftone(g, 0, 0, bw, bh, (x, y) => ((Math.hypot(x - bw / 2, y - bh / 2) / maxD) ** 1.8) * 0.55, { cell: 11 * dpr, color: P.pinkDeep, angle: 0.4 });
+    applyGrain(g, this.grain, 0, 0, bw, bh, P.high ? 0.35 : 1);
 
     // sunburst behind the record
     const sr = L.R * 1.55 * dpr;
@@ -988,9 +989,15 @@ export class Renderer {
     this.drawBackground(now, pulse);
     const k = st.drop ?? 0; // 0 = poster position, 1 = on the turntable
     const e = ease.inOut(Math.min(1, k));
-    const restX = L.portrait ? L.W * 0.5 : L.W * 0.8;
-    const restY = L.portrait ? L.H * 1.02 : L.H * 0.86;
-    const restS = L.portrait ? 1.2 : 1.05;
+    let restX = L.portrait ? L.W * 0.5 : L.W * 0.8;
+    let restY = L.portrait ? L.H * 1.02 : L.H * 0.86;
+    let restS = L.portrait ? 1.2 : 1.05;
+    if (k > 0 && st.from) {
+      // the drop starts from where the record sat on the page
+      restX = st.from.x;
+      restY = st.from.y;
+      restS = st.from.s;
+    }
     const x = restX + (L.cx - restX) * e;
     const y = restY + (L.cy - restY) * e;
     const s = restS + (1 - restS) * e;

@@ -13,6 +13,11 @@ export class AudioEngine {
     this.muted = false;
     this._clockOffset = null;
     this.lastSkid = -1;
+    // Everything passes through the limiter, whose look-ahead delays the output by 6 ms;
+    // the lo-fi tape-wow delay adds a little more to the music. Measured from rendered
+    // audio and compensated in the game clock (see Play) and in calibration.
+    this.outDelay = 0.006;
+    this.musicDelay = 0.006;
   }
 
   /** Create the context. Must be called from a user gesture (browsers block audio until then). */
@@ -162,6 +167,7 @@ export class AudioEngine {
     const wow = fx.wow || 0;
     this.wowDepth.gain.setValueAtTime(wow, t);
     this.wow.delayTime.setValueAtTime(wow ? wow * 1.3 : 0, t);
+    this.musicDelay = this.outDelay + (wow ? wow * 1.3 : 0);
     this.drive.curve = S.driveCurve(fx.drive || 0);
     this.reverbSend.gain.setValueAtTime(fx.reverb ?? 0.2, t);
     this.delay.delayTime.setValueAtTime(Math.min(1.4, song.spb * 0.75), t);

@@ -4,10 +4,200 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Needle Drop – a rhythm game on a spinning record</title>
+    <meta name="description" content="Needle Drop is a 2D rhythm game played on a spinning vinyl record. Tap, hold and scratch the notes printed on its grooves as they reach the needle. All the music is made in code." />
+    <meta name="theme-color" content="#ff48b0" />
+    <meta name="color-scheme" content="light" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Needle Drop" />
+    <meta property="og:description" content="A rhythm game on a spinning record: tap, hold and scratch the notes printed on the grooves." />
+    <meta name="twitter:card" content="summary" />
+    <!-- Favicon drawn in code (inline SVG). main.js swaps in a printed canvas version once loaded. -->
+    <link rel="icon" id="favicon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23ff48b0'/%3E%3Ccircle cx='34' cy='34' r='25' fill='%23ffe800'/%3E%3Ccircle cx='32' cy='32' r='25' fill='%231c2373'/%3E%3Ccircle cx='32' cy='32' r='9' fill='%23ffe800'/%3E%3Ccircle cx='32' cy='32' r='2.5' fill='%231c2373'/%3E%3Cpath d='M56 6 36 20' stroke='%23fff3e8' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E" />
   </head>
   <body>
-    <canvas id="stage" aria-label="Turntable"></canvas>
-    <button id="go" style="position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font:24px Bungee;padding:16px 24px;background:#ffe800;border:0">DROP THE NEEDLE</button>
+    <canvas id="stage" aria-hidden="true"></canvas>
+
+    <!-- In-play buttons (touch friendly); everything else in play is drawn on the canvas -->
+    <div id="hud" class="hud" hidden>
+      <button class="chip" id="btn-pause" aria-label="Pause (Esc)" title="Pause (Esc)"><span aria-hidden="true">❚❚</span></button>
+      <button class="chip" id="btn-mute" aria-label="Mute (M)" title="Mute (M)"><span aria-hidden="true" class="mute-icon">♪</span></button>
+    </div>
+    <div id="live" class="sr-only" aria-live="polite"></div>
+
+    <!-- Shop front -->
+    <section id="scr-title" class="screen" aria-label="Main menu">
+      <div class="panel title-panel">
+        <p class="eyebrow pulse">the record shop that plays back</p>
+        <h1 class="logo"><span class="logo-a">NEEDLE</span><span class="logo-b">DROP</span></h1>
+        <p class="tagline">Tap, hold and scratch the notes printed on a spinning record.</p>
+        <nav class="menu">
+          <button class="tag big pulse" data-go="crate"><span>Dig the crate</span><small>12 sides · 3 records</small></button>
+          <button class="tag" data-go="dig"><span>Crate Dig</span><small>endless · seeded</small></button>
+          <button class="tag" data-go="daily"><span>Today's dig</span><small id="daily-sub">daily seed</small></button>
+          <div class="menu-row">
+            <button class="tag small" data-go="tutorial"><span>How to play</span></button>
+            <button class="tag small" data-go="calibrate"><span>Calibrate</span></button>
+            <button class="tag small" data-go="settings"><span>Settings</span></button>
+          </div>
+        </nav>
+        <p class="hint" id="sound-hint">♪ Sound on! Everything you hear is made in code.</p>
+      </div>
+    </section>
+
+    <!-- The crate: three records -->
+    <section id="scr-crate" class="screen" aria-label="The crate" hidden>
+      <header class="bar">
+        <button class="tag small back" data-go="back"><span>← Shop</span></button>
+        <h2 class="heading">The crate</h2>
+      </header>
+      <div class="crate" id="crate"></div>
+      <p class="hint" id="crate-hint">Pick a record. Clear 3 sides of a record to unlock the next.</p>
+    </section>
+
+    <!-- One record out of its sleeve: the tracklist -->
+    <section id="scr-record" class="screen" aria-label="Record" hidden>
+      <header class="bar">
+        <button class="tag small back" data-go="back"><span>← Crate</span></button>
+        <h2 class="heading" id="rec-heading">Record</h2>
+      </header>
+      <div class="record-view">
+        <div class="sleeve-stack" id="sleeve-stack">
+          <canvas class="disc" id="rec-disc" width="400" height="400" aria-hidden="true"></canvas>
+          <canvas class="sleeve-art" id="rec-sleeve" width="400" height="400" aria-hidden="true"></canvas>
+        </div>
+        <div class="sleeve-back">
+          <p class="meta" id="rec-meta"></p>
+          <ol class="sides" id="rec-sides"></ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- Crate Dig setup -->
+    <section id="scr-dig" class="screen" aria-label="Crate Dig" hidden>
+      <header class="bar">
+        <button class="tag small back" data-go="back"><span>← Shop</span></button>
+        <h2 class="heading">Crate Dig</h2>
+      </header>
+      <div class="dig-view">
+        <canvas class="sleeve-art small" id="dig-sleeve" width="300" height="300" aria-hidden="true"></canvas>
+        <div class="card">
+          <p>An endless crate of records nobody has heard before, invented from a <b>seed</b>. Each record is about a minute; they get faster and harder as you dig. Your score, combo and skips carry over. Three skips and the dig is over.</p>
+          <label class="seed-row">
+            <span>Seed</span>
+            <input id="dig-seed" type="text" maxlength="24" autocomplete="off" spellcheck="false" />
+            <button class="tag small" id="dig-random"><span>Shuffle</span></button>
+          </label>
+          <p class="small-print" id="dig-first"></p>
+          <div class="menu-row">
+            <button class="tag big pulse" id="dig-go"><span>Start digging</span></button>
+          </div>
+          <p class="small-print" id="dig-best"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section id="scr-results" class="screen" aria-label="Results" hidden>
+      <div class="results">
+        <div class="rank-wrap">
+          <div class="rank-stamp" id="res-rank">S</div>
+          <div class="sticker" id="res-new" hidden>New best!</div>
+        </div>
+        <div class="card results-card">
+          <h2 class="heading" id="res-title">Side done</h2>
+          <p class="meta" id="res-sub"></p>
+          <p class="score" id="res-score">0</p>
+          <dl class="stats" id="res-stats"></dl>
+          <p class="small-print" id="res-note"></p>
+          <div class="menu-row wrap">
+            <button class="tag big pulse" id="res-again"><span>Play again</span></button>
+            <button class="tag" id="res-next" hidden><span>Next side</span></button>
+            <button class="tag" id="res-copy" hidden><span>Copy seed</span></button>
+            <button class="tag" id="res-back"><span>Back to the crate</span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pause -->
+    <section id="scr-pause" class="screen dim" aria-label="Paused" hidden>
+      <div class="panel small-panel">
+        <h2 class="heading">Paused</h2>
+        <p class="meta">The record will count you back in.</p>
+        <nav class="menu">
+          <button class="tag big" id="pause-resume"><span>Resume</span></button>
+          <button class="tag" id="pause-restart"><span>Restart side</span></button>
+          <button class="tag" id="pause-settings"><span>Settings</span></button>
+          <button class="tag" id="pause-quit"><span>Quit</span></button>
+        </nav>
+      </div>
+    </section>
+
+    <!-- Settings -->
+    <section id="scr-settings" class="screen dim" aria-label="Settings" hidden>
+      <div class="panel settings-panel">
+        <header class="bar">
+          <button class="tag small back" data-go="back"><span>← Back</span></button>
+          <h2 class="heading">Settings</h2>
+        </header>
+        <form class="settings" id="settings-form" onsubmit="return false">
+          <fieldset>
+            <legend>Sound</legend>
+            <label class="range"><span>Music</span><input type="range" min="0" max="1" step="0.05" name="music" /></label>
+            <label class="range"><span>Effects &amp; crackle</span><input type="range" min="0" max="1" step="0.05" name="sfx" /></label>
+            <label class="range"><span>Hit sounds</span><input type="range" min="0" max="1" step="0.05" name="hits" /></label>
+            <label class="check"><input type="checkbox" name="muted" /><span class="box" aria-hidden="true"></span><span>Mute everything <kbd>M</kbd></span></label>
+          </fieldset>
+          <fieldset>
+            <legend>Look</legend>
+            <label class="check"><input type="checkbox" name="reducedMotion" /><span class="box" aria-hidden="true"></span><span>Reduced motion <small>(no shake, wobble or flashing)</small></span></label>
+            <label class="check"><input type="checkbox" name="highContrast" /><span class="box" aria-hidden="true"></span><span>High-contrast colours</span></label>
+            <label class="check"><input type="checkbox" name="symbols" /><span class="box" aria-hidden="true"></span><span>Note symbols <small>(patterns and key letters on every note)</small></span></label>
+            <label class="range"><span>Note speed <output id="out-scroll"></output></span><input type="range" min="0.7" max="1.5" step="0.05" name="scroll" /></label>
+          </fieldset>
+          <fieldset>
+            <legend>Keys</legend>
+            <div class="binds" id="binds"></div>
+            <p class="small-print">Esc pauses, M mutes. Gamepad: X / A / B for the grooves, Y, a bumper or a stick flick to scratch.</p>
+          </fieldset>
+          <fieldset>
+            <legend>Timing</legend>
+            <label class="range"><span>Input offset <output id="out-input"></output></span><input type="range" min="-200" max="200" step="1" name="inputOffset" /></label>
+            <label class="range"><span>Visual offset <output id="out-visual"></output></span><input type="range" min="-150" max="150" step="1" name="visualOffset" /></label>
+            <div class="menu-row"><button class="tag small" data-go="calibrate" type="button"><span>Calibrate</span></button></div>
+          </fieldset>
+          <fieldset>
+            <legend>Progress</legend>
+            <div class="menu-row">
+              <button class="tag small" data-go="tutorial" type="button"><span>Replay the tutorial</span></button>
+              <button class="tag small danger" id="reset-progress" type="button"><span>Reset progress</span></button>
+            </div>
+          </fieldset>
+        </form>
+      </div>
+    </section>
+
+    <!-- Calibration -->
+    <section id="scr-cal" class="screen dim" aria-label="Calibration" hidden>
+      <div class="panel cal-panel">
+        <header class="bar">
+          <button class="tag small back" data-go="back"><span>← Back</span></button>
+          <h2 class="heading">Calibrate</h2>
+        </header>
+        <p id="cal-text">Tap any key, click or touch the pad on every click you hear. Start when you're ready: four clicks to get the feel, then sixteen to measure.</p>
+        <button class="cal-pad" id="cal-pad" type="button" aria-label="Tap here on each click"><span class="cal-flash" id="cal-flash"></span><span class="cal-count" id="cal-count">TAP</span></button>
+        <div class="cal-scale" aria-hidden="true"><div class="cal-marks" id="cal-marks"></div><span class="cal-zero"></span><span class="cal-l">early</span><span class="cal-r">late</span></div>
+        <p class="meta" id="cal-result"></p>
+        <label class="range"><span>Visual offset <output id="cal-vis-out"></output></span><input type="range" min="-150" max="150" step="1" id="cal-vis" /></label>
+        <p class="small-print">Visual offset: slide until the flashing pad lands right on the click.</p>
+        <div class="menu-row wrap">
+          <button class="tag big" id="cal-start" type="button"><span>Start</span></button>
+          <button class="tag" id="cal-save" type="button" disabled><span>Use this offset</span></button>
+        </div>
+      </div>
+    </section>
+
+    <noscript><p class="noscript">Needle Drop needs JavaScript to spin its records.</p></noscript>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

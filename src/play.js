@@ -73,13 +73,13 @@ export class Play {
   /** Song time as heard (for drawing). */
   heardSongTime(perf = performance.now()) {
     const { engine, seq } = this.app;
-    return engine.heardAt(perf) - seq.songStart - (this.app.settings().visualOffset || 0) / 1000;
+    return engine.heardAt(perf) - engine.musicDelay - seq.songStart - (this.app.settings().visualOffset || 0) / 1000;
   }
 
   /** Song time on the judging timeline (heard time, corrected by the calibrated input offset). */
   judgeTime(perf) {
     const { engine, seq } = this.app;
-    return engine.heardAt(perf) - seq.songStart - (this.app.settings().inputOffset || 0) / 1000;
+    return engine.heardAt(perf) - engine.musicDelay - seq.songStart - (this.app.settings().inputOffset || 0) / 1000;
   }
 
   frame(perfNow) {
@@ -107,13 +107,7 @@ export class Play {
     }
 
     if (this.state === 'playing') {
-      for (const ev of input.drain()) {
-        const et = this.judgeTime(ev.perf);
-        if (ev.type === 'down') {
-          renderer.onPress(ev.lane);
-          this.handle(this.session.press(ev.lane, et), ev.lane);
-        } else this.handle(this.session.release(ev.lane, et), ev.lane);
-      }
+      this.processInput();
       this.handle(this.session.update(tj));
       if (this.session.scorer.failed && !this.ended) this.fail(t);
       else if (this.session.done && !this.ended && t > this.song.endTime + 0.4) this.sideEnded();
@@ -127,6 +121,18 @@ export class Play {
     this.lastPerf = perfNow;
     this.lastT = t;
     this.draw(t, perfNow);
+  }
+
+  /** Judge every queued press/release at the moment it happened. */
+  processInput() {
+    const { input, renderer } = this.app;
+    for (const ev of input.drain()) {
+      const et = this.judgeTime(ev.perf);
+      if (ev.type === 'down') {
+        renderer.onPress(ev.lane);
+        this.handle(this.session.press(ev.lane, et));
+      } else this.handle(this.session.release(ev.lane, et));
+    }
   }
 
   draw(t, perfNow) {
@@ -165,7 +171,7 @@ export class Play {
     return text.replace('{0}', keyName(b.lanes[0])).replace('{1}', keyName(b.lanes[1])).replace('{2}', keyName(b.lanes[2])).replace('{S}', keyName(b.scratch));
   }
 
-  handle(evs, lane = null) {
+  handle(evs) {
     const { engine, renderer, seq } = this.app;
     for (const e of evs) {
       if (e.type === 'judge') {
@@ -184,7 +190,6 @@ export class Play {
         engine.thump(engine.now, 0.5, 55);
       }
     }
-    void lane;
   }
 
   fail(t) {
@@ -256,6 +261,8 @@ export class Play {
   pause() {
     if (this.state !== 'playing' && this.state !== 'countin') return false;
     const { seq, engine, input } = this.app;
+    // presses that arrived in the same frame as the pause still count
+    if (this.state === 'playing') this.processInput();
     const tj = this.judgeTime(performance.now());
     this.pausedAt = this.state === 'countin' ? Math.min(tj, this.resumeT) : tj;
     this.pausedDrawT = this.heardSongTime();
