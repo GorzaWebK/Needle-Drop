@@ -2,13 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Needle Drop – audio engine</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Needle Drop – a rhythm game on a spinning record</title>
   </head>
-  <body style="font-family:sans-serif;background:#ff48b0;color:#1c2373">
-    <h1>Needle Drop: audio engine test</h1>
-    <div id="list"></div>
-    <p id="status"></p>
+  <body>
+    <canvas id="stage" aria-label="Turntable"></canvas>
+    <button id="go" style="position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font:24px Bungee;padding:16px 24px;background:#ffe800;border:0">DROP THE NEEDLE</button>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

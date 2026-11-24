@@ -99,8 +99,8 @@ export const TUTORIAL = {
   tutorial: true,
   plan: [
     { name: 'intro', bars: 2, drums: 0, bass: null, keys: 0, lead: null, chart: { lanes: [] }, text: 'The needle is down. Notes ride round on the grooves to the needle at the top.' },
-    { name: 'A', bars: 4, drums: 1, bass: null, keys: null, lead: null, only: ['kick', 'snare'], chart: { lanes: [0] }, text: 'INNER groove = the drums. Press {0} (or tap the inner ring) as each dot reaches the needle.' },
-    { name: 'A', bars: 4, drums: 0, only: ['hat'], bass: 1, keys: null, lead: null, chart: { lanes: [1] }, text: 'MIDDLE groove = the bass. Press {1} (or tap the middle ring) on each diamond.' },
+    { name: 'A', bars: 4, drums: 1, bass: null, keys: null, lead: null, only: ['kick', 'snare'], chart: { lanes: [0] }, text: 'INNER groove = the drums. Press {0} (or tap the inner ring) as each round dot reaches the needle.' },
+    { name: 'A', bars: 4, drums: 0, only: ['hat'], bass: 1, keys: null, lead: null, chart: { lanes: [1] }, text: 'MIDDLE groove = the bass. Press {1} (or tap the middle ring) on each triangle.' },
     { name: 'A', bars: 4, drums: 0, only: ['hat'], bass: null, keys: null, lead: 'full', chart: { lanes: [2] }, text: 'OUTER groove = the melody. Press {2} (or tap the outer ring) on each square.' },
     { name: 'A', bars: 4, drums: 0, only: ['hat'], bass: 0, keys: null, lead: 'long', chart: { lanes: [1, 2], holds: true }, text: 'A long arc is a HOLD. Press when it arrives and keep holding until the arc ends.' },
     { name: 'A', bars: 4, drums: 1, bass: null, keys: null, lead: null, scratch: true, scratchEvery: 1, chart: { lanes: ['S'] }, text: 'Zig-zag = SCRATCH. Press {S}, or swipe across the screen, as it passes the needle.' },

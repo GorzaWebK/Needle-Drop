@@ -1,38 +1,61 @@
-// Stage 1 harness: play any track through the engine and sequencer.
+// Stage 2 harness: one playable side. ?track=<id> picks the side.
+import '@fontsource/bungee/400.css';
+import '@fontsource/rubik/400.css';
+import '@fontsource/rubik/500.css';
+import '@fontsource/rubik/700.css';
+import './style.css';
 import { AudioEngine } from './audio/engine.js';
 import { Sequencer } from './audio/sequencer.js';
-import { buildSong } from './audio/compose.js';
-import { TRACKS, TUTORIAL, RADIO } from './tracks.js';
+import { Renderer } from './render.js';
+import { Input } from './input.js';
+import { Play } from './play.js';
+import { readPalette } from './print.js';
+import * as store from './storage.js';
+import { TRACKS, TUTORIAL, trackById } from './tracks.js';
 
+store.load();
+const canvas = document.getElementById('stage');
 const engine = new AudioEngine();
 const seq = new Sequencer(engine);
-const list = document.getElementById('list');
-const status = document.getElementById('status');
-let played = 0;
-seq.onEvent = () => { played++; };
+const renderer = new Renderer(canvas);
+let play = null;
+const input = new Input(canvas, {
+  laneAt: (x, y) => renderer.laneAt(x, y),
+  onPause: () => { if (play?.state === 'paused') engine.resume().then(() => play.resume()); else play?.pause(); },
+  onMute: () => engine.setMuted(!engine.muted),
+});
 
-for (const t of [RADIO, TUTORIAL, ...TRACKS]) {
-  const b = document.createElement('button');
-  b.textContent = `${t.title} (${t.genre}, ${t.bpm})`;
-  b.onclick = () => {
-    engine.init();
-    engine.setCrackle(0.4);
-    const song = buildSong(t);
-    seq.load(song, { loop: t === RADIO });
-    seq.start(0, engine.now + 0.1);
-  };
-  list.append(b, document.createElement('br'));
-}
-const stop = document.createElement('button');
-stop.textContent = 'Stop';
-stop.onclick = () => seq.stop();
-list.append(stop);
+const app = {
+  engine, seq, renderer, input,
+  settings: () => store.settings(),
+  palette: () => renderer.P,
+  onFinish: (r) => { window.lastResult = r; document.getElementById('go').hidden = false; document.getElementById('go').textContent = `${r.rank} · ${r.score} · AGAIN?`; },
+};
 
-function frame() {
-  seq.tick();
-  if (seq.running) status.textContent = `song time ${seq.songTime().toFixed(2)} s, events scheduled ${played}`;
+async function boot() {
+  try { await Promise.all([document.fonts.load('40px Bungee'), document.fonts.load('700 20px Rubik'), document.fonts.load('500 20px Rubik')]); } catch { /* fonts optional */ }
+  renderer.setPalette(readPalette());
+  renderer.resize();
   requestAnimationFrame(frame);
 }
-requestAnimationFrame(frame);
-setInterval(() => seq.tick(), 50); // wake-up only; timing comes from ctx.currentTime
-window.nd = { engine, seq, buildSong, TRACKS, TUTORIAL, RADIO, AudioEngine };
+
+function frame(ts) {
+  renderer.resize();
+  if (play && play.state !== 'done') play.frame(performance.now());
+  else renderer.drawMenu({ clock: performance.now() / 1000, pulse: 0 });
+  requestAnimationFrame(frame);
+}
+setInterval(() => seq.tick(), 50); // wake-up only: scheduling is timed from ctx.currentTime
+
+document.getElementById('go').onclick = () => {
+  engine.init();
+  const params = new URLSearchParams(location.search);
+  const id = params.get('track') || 'pink-slip';
+  const track = id === 'tutorial' ? TUTORIAL : trackById(id) || TRACKS[0];
+  document.getElementById('go').hidden = true;
+  play = new Play(app, { mode: 'side', track });
+  play.start();
+};
+document.addEventListener('visibilitychange', () => { if (document.hidden) play?.pause(); });
+window.needleDrop = { engine, seq, renderer, input, get play() { return play; }, store };
+boot();
