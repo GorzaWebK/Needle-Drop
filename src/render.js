@@ -18,9 +18,13 @@ const ease = {
 };
 
 export class Renderer {
-  constructor(canvas) {
+  constructor(canvas, backdrop) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
+    // the static poster background lives on its own canvas, drawn only when the size or palette changes
+    this.backdrop = backdrop;
+    this.maxDpr = 2; // lowered automatically if frames run slow
+    this.slowFrames = 0;
     this.opts = { reducedMotion: false, symbols: false };
     this.P = null;
     this.grain = makeGrain(256, 'paper');
@@ -52,7 +56,7 @@ export class Renderer {
   }
 
   resize() {
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const dpr = Math.min(this.maxDpr, window.devicePixelRatio || 1);
     const W = Math.max(1, this.canvas.clientWidth || window.innerWidth);
     const H = Math.max(1, this.canvas.clientHeight || window.innerHeight);
     if (W === this.W && H === this.H && dpr === this.dpr && this.bg) return false;
@@ -106,7 +110,9 @@ export class Renderer {
     // background: flood of ink, halftone towards the corners, grain
     const bw = Math.ceil(L.W * dpr);
     const bh = Math.ceil(L.H * dpr);
-    this.bg = makeCanvas(bw, bh);
+    this.backdrop.width = bw;
+    this.backdrop.height = bh;
+    this.bg = this.backdrop;
     const g = this.bg.getContext('2d');
     g.fillStyle = P.bg;
     g.fillRect(0, 0, bw, bh);
@@ -116,7 +122,9 @@ export class Renderer {
     applyGrain(g, this.grain, 0, 0, bw, bh, P.high ? 0.35 : 1);
 
     // sunburst behind the record
-    const sr = L.R * 1.55 * dpr;
+    const sunRes = Math.min(1, dpr * 0.6);
+    const sr = L.R * 1.55 * sunRes;
+    this.sunRes = sunRes;
     this.sun = makeCanvas(sr * 2, sr * 2);
     const sg = this.sun.getContext('2d');
     const rays = 18;
@@ -440,8 +448,8 @@ export class Renderer {
   drawBackground(time, pulse) {
     const { ctx } = this;
     const L = this.L;
-    ctx.drawImage(this.bg, 0, 0, L.W, L.H);
-    const sw = this.sun.width / this.dpr;
+    ctx.clearRect(0, 0, L.W, L.H);
+    const sw = this.sun.width / this.sunRes;
     const scale = 1 + (this.opts.reducedMotion ? 0 : 0.045 * pulse);
     ctx.save();
     ctx.translate(L.cx, L.cy);
@@ -1003,6 +1011,20 @@ export class Renderer {
     const s = restS + (1 - restS) * e;
     this.drawRecord(x, y, s, now * 0.9, pulse);
     if (k > 0) this.drawArm(L.cx, L.cy, L.R, Math.max(0, (k - 0.6) / 0.4));
+  }
+
+  /** Called once per frame with the time since the last one; drops resolution if the device struggles. */
+  watchFrame(ms) {
+    if (ms > 24 && ms < 250) this.slowFrames++;
+    else this.slowFrames = Math.max(0, this.slowFrames - 1);
+    if (this.slowFrames > 90 && this.maxDpr > 1) {
+      this.maxDpr = Math.max(1, this.maxDpr - 0.5);
+      this.slowFrames = 0;
+      this.W = 0; // force a rebuild at the lower resolution
+      this.resize();
+      return true;
+    }
+    return false;
   }
 
   decay(dt) {

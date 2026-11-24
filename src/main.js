@@ -2,10 +2,10 @@
 // turntable and the life of a side (play, pause, results). One animation loop draws the
 // canvas; the sequencer schedules audio against the AudioContext clock.
 
-import '@fontsource/bungee/400.css';
-import '@fontsource/rubik/400.css';
-import '@fontsource/rubik/500.css';
-import '@fontsource/rubik/700.css';
+import '@fontsource/bungee/latin-400.css';
+import '@fontsource/rubik/latin-400.css';
+import '@fontsource/rubik/latin-500.css';
+import '@fontsource/rubik/latin-700.css';
 import './style.css';
 
 import { AudioEngine } from './audio/engine.js';
@@ -29,7 +29,7 @@ store.load();
 const canvas = $('stage');
 const engine = new AudioEngine();
 const seq = new Sequencer(engine);
-const renderer = new Renderer(canvas);
+const renderer = new Renderer(canvas, $('backdrop'));
 
 let mode = 'menu'; // 'menu' | 'drop' | 'play'
 let play = null;
@@ -412,9 +412,14 @@ $('res-copy').addEventListener('click', async () => {
 
 // ---------------------------------------------------------------- the loop
 
+let lastFrame = 0;
 function frame() {
-  renderer.resize();
   const now = performance.now();
+  if (lastFrame && renderer.watchFrame(now - lastFrame) && play?.track) {
+    renderer.setLabel(play.track, drawLabel(Math.round(renderer.layout.labelR * 2 * renderer.dpr), play.track, renderer.P));
+  }
+  lastFrame = now;
+  renderer.resize();
   if (mode === 'play' && play && play.state !== 'done') {
     play.frame(now);
   } else if (mode === 'drop' && drop) {
