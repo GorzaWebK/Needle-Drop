@@ -1,14 +1,44 @@
-# Needle Drop
+<div align="center">
+
+<img src="docs/media/glitter-tax.gif" width="380" alt="Needle Drop: playing Glitter Tax">
+
+# 💿 NEEDLE DROP 💿
+
+### Tap, hold and scratch the notes printed on a spinning record.
+
+<a href="https://gorzawebk.github.io/Needle-Drop/"><img src="https://img.shields.io/badge/Drop%20the%20needle-play%20now-FF3EA5?style=for-the-badge" alt="Drop the needle: play now"></a>
+<img src="https://img.shields.io/badge/Genre-rhythm-FFD400?style=for-the-badge" alt="Genre: rhythm">
+<img src="https://img.shields.io/badge/Input-keys%20·%20gamepad%20·%20touch-2B2F8C?style=for-the-badge" alt="Input: keys · gamepad · touch">
+<img src="https://img.shields.io/badge/Built%20with-vanilla%20JS-1A1A1A?style=for-the-badge&logo=javascript&logoColor=white" alt="Built with: vanilla JS">
+
+<sub>▲ A1 · Glitter Tax (Disco, 117 BPM) from <i>Mirrorball Margins</i>, PERFECT after PERFECT. Real gameplay recorded in the browser, with an input script hitting the notes on the beat.</sub>
+
+</div>
+
+```
+ ╭──────────────────────────────────────────╮
+ │  SIDE A   Glitter Tax ........ Disco 117  │
+ │           Pink Slip ...... Jack House 122 │
+ │  SIDE B   Two-Step Taxi ... UK garage 130 │
+ │           Robot Postman ...... Electro 126 │
+ ╰──────────────────────────────────────────╯
+        one of the records in the crate
+```
 
 A rhythm game played on a spinning vinyl record: tap, hold and scratch the notes printed on its grooves as they come round to the needle.
 
-**Play:** https://gorzawebk.github.io/Needle-Drop/
-
-Plays on PC (keyboard or gamepad) and on phones and tablets (touch, portrait or landscape). Everything is made in code: the music, the sound effects, the record, the sleeves, the print effects and the favicon. There are no image or audio files.
+Plays on PC (keyboard or gamepad) and on phones and tablets (touch, portrait or landscape). Everything in the game is made in code: the music, the sound effects, the record, the sleeves, the print effects and the favicon. The game itself loads no image or audio files (the pictures on this page are only screenshots).
 
 > "Needle Drop" is a working title.
 
-## Controls
+## 📀 Liner notes
+
+<table>
+<tr><td align="center" valign="top"><img src="docs/media/the-crate.jpg" width="400" alt="Dig the crate"><br><sub>Dig the crate</sub></td><td align="center" valign="top"><img src="docs/media/sleeve.jpg" width="400" alt="Pick a side"><br><sub>Pick a side</sub></td></tr>
+</table>
+<div align="center"><img src="docs/media/playing.jpg" width="600" alt="On the record"><br><sub>Notes riding the grooves round to the needle</sub></div>
+
+## 🅰️ SIDE A · Controls
 
 | Input | Action |
 | --- | --- |
@@ -25,7 +55,7 @@ F, J, K and Space can be changed in **Settings → Keys**.
 
 **Gamepad:** X / A / B (or D-pad left / down / right) for the three grooves; Y, a bumper, a trigger or a flick of either stick to scratch; Start pauses.
 
-## How to play
+## 🅰️ SIDE A · How to play
 
 The record spins in the middle of the screen with the tonearm's needle at 12 o'clock. Notes are printed on the record's three grooves and ride round with it, clockwise, to the needle. Hit each one as it passes under the needle.
 
@@ -35,7 +65,7 @@ The record spins in the middle of the screen with the tonearm's needle at 12 o'c
 
 Every note comes from the music itself. The inner groove plays the drums (kick, snare, clap), the middle the bass line and the outer the melody (or the chords where there's no melody). Long bass and melody notes become holds. Scratches land on the DJ cuts, where the drums drop out for a beat.
 
-### Timing and score
+### ⏱️ Timing and score
 
 | Judgement | Window | Points |
 | --- | --- | --- |
@@ -52,7 +82,7 @@ The **groove meter** under the record fills as you hit and drains when you miss.
 
 Each side ends with a **rank** from accuracy: **S** 95%+, **A** 88%+, **B** 78%+, **C** 65%+, otherwise **D** (and always D if the record skipped out).
 
-### Records and modes
+### 📦 Records and modes
 
 - **Dig the crate:** three records of four sides each, about 90 seconds a side.
   - *Sunny Side Up* (Easy): lo-fi, boom-bap, one-drop reggae and funk (86–104 BPM).
@@ -66,7 +96,7 @@ Each side ends with a **rank** from accuracy: **S** 95%+, **A** 88%+, **B** 78%+
 
 Best scores, ranks, full combos, unlocks, Crate Dig bests, daily results and settings are saved in `localStorage` (wrapped in try/catch, so the game still works where storage is blocked).
 
-## Settings
+## 🅰️ SIDE A · Settings
 
 - Music, effects & crackle, and hit-sound volumes; mute.
 - **Reduced motion:** turns off the shake, the misprint wobble, the flashing and the beat pulses. It is on by default if your system asks for reduced motion.
@@ -76,7 +106,7 @@ Best scores, ranks, full combos, unlocks, Crate Dig bests, daily results and set
 - Key bindings.
 - Input offset and visual offset, plus **Calibrate**: tap along to a click (four to get the feel, sixteen measured). The median difference becomes your input offset. A flashing pad helps you set the visual offset.
 
-## Look and sound
+## 🅱️ SIDE B · Look and sound
 
 - **Print:** a loud risograph poster in three inks on paper: fluorescent pink `#ff48b0`, navy `#1c2373` and lemon yellow `#ffe800` (plus paper `#fff3e8` and a deeper pink `#e8268c`). They are all CSS variables, and the canvas reads them from there. Halftone dots, paper grain, colour plates printed 1–2 px out of register, and notes cut like stickers that "boil" a little from frame to frame. No black backgrounds, no orange, no glow: inks never mix into new colours, not even in the dimmed overlays.
 - **Type:** Bungee for titles and stamps, Rubik for reading. Both are bundled with @fontsource (Latin subsets), so nothing loads from a font CDN.
@@ -85,7 +115,7 @@ Best scores, ranks, full combos, unlocks, Crate Dig bests, daily results and set
 - **Music:** made with the Web Audio API by a small sequencer. Each genre has its own drum patterns, swing, drum kit, bass, chord and lead instruments and effects (tape wow and low-pass for lo-fi, echo for reggae and house, drive for big beat). Each track is composed from its tempo, key, chord progression and seed: intro, verses, choruses, breakdown and outro.
 - **Sound effects:** woody hit ticks pitched per groove, a vinyl crackle layer, real scratches (a generated "aah" sample read back at the speed of a moving hand), a needle dragged across the record on a miss, a needle-drop thump and count-in clicks.
 
-## How it's built
+## 🅱️ SIDE B · How it's built
 
 - Plain JavaScript modules, HTML5 Canvas 2D and [Vite](https://vite.dev). No framework, no 3D. The only runtime dependencies are the two @fontsource fonts.
 - **One source of truth for music and notes:** the composer turns a track into a list of events with exact times. The sequencer plays that list and the chart generator picks notes from the very same list, so a note always sits on a sound. Difficulty only decides *which* events become notes (grid, spacing, chords, holds), never *when*. Unit tests check every note against its event, and a test render confirmed each note's sound starts where its note is.
@@ -117,7 +147,7 @@ Best scores, ranks, full combos, unlocks, Crate Dig bests, daily results and set
 | `src/style.css` | Palette variables, price stickers, crate, panels, high-contrast and reduced-motion rules |
 | `tests/` | Vitest tests for chart generation, timing judgement, scoring, the session, the composer, seeds and saving |
 
-### Decisions made along the way
+### 📝 Decisions made along the way
 
 The brief asked for a game that looks, sounds and feels unlike the six existing GorzaWebK games. These are the changes made for that, and other choices:
 
@@ -131,7 +161,7 @@ The brief asked for a game that looks, sounds and feels unlike the six existing 
 - **No penalty for stray presses.** A press with no note nearby does nothing, so swipes and nervous taps aren't punished.
 - **The daily seed** uses the player's local date, like Paper Tides' Daily Island.
 
-## Running locally
+## 🅱️ SIDE B · Running locally
 
 ```bash
 npm install
@@ -143,6 +173,14 @@ npm run preview
 
 Testing helpers: `window.needleDrop` in the console gives you the `engine`, `seq`, `renderer`, `store`, the current `play`, `startSide(id)` and `startDig(seed, 'dig')`.
 
-## Deployment
+## 🅱️ SIDE B · Deployment
 
 Every push to `main` runs the tests, builds the game and publishes it to GitHub Pages via `.github/workflows/deploy.yml`. One-time setup: in the repository's **Settings → Pages**, set **Source** to **GitHub Actions**.
+
+---
+
+<div align="center">
+
+**💿 That's the end of the side. Flip the record. 💿**
+
+</div>
